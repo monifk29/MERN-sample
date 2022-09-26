@@ -1,10 +1,14 @@
 const express = require("express");
-require('./db/config')
+// require('./db/config')
+
+const {connection} = require("./db/config");
+const UserModel = require("./db/User");
+const ProductModel = require("./db/Product");
 
 const cors = require("cors");
 
-const User = require("./db/User")
-const Product = require("./db/Product")
+// const User = require("./db/User")
+// const Product = require("./db/Product")
 
 const Jwt = require("jsonwebtoken");
 const jwtKey = "@420";
@@ -13,8 +17,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+app.get("/",(req,res) => {
+    res.send("homepage")
+})
+
 app.post("/reg", async (req,res) => {
-    let user = new User(req.body);
+    let user = new UserModel(req.body);
     let result = await user.save()
     result = result.toObject();
     delete result.pass;
@@ -29,7 +37,7 @@ app.post("/reg", async (req,res) => {
 app.post("/login", async (req,res) => {
 if(req.body.pass && req.body.email){
 
-    let user = await User.findOne(req.body).select("-pass");
+    let user = await UserModel.findOne(req.body).select("-pass");
     if(user){
         Jwt.sign({user},jwtKey, (err,token) =>{
             if(err){
@@ -51,14 +59,14 @@ else{
 
 
 app.post("/add-product",verifyToken, async (req,res) => {
-let product =  new Product(req.body);
+let product =  new ProductModel(req.body);
 let result = await product.save();
 res.send(result)
 })
 
 
 app.get("/products", verifyToken , async(req,res) => {
-    let products = await Product.find();
+    let products = await ProductModel.find();
     if(products.length > 0){
         res.send(products)
     }
@@ -71,7 +79,7 @@ app.get("/products", verifyToken , async(req,res) => {
 
 app.get("/product/:id",verifyToken,async (req,res) => {
    
-    let result = await Product.findOne({_id:req.params.id});
+    let result = await ProductModel.findOne({_id:req.params.id});
 if(result){
     res.send(result)
 
@@ -81,8 +89,8 @@ else{
 }
 })
 
-app.put("/product/:id",verifyToken         , async (req,res) => {
-    let result = await Product.updateOne({_id:req.params.id},
+app.put("/product/:id",verifyToken, async (req,res) => {
+    let result = await ProductModel.updateOne({_id:req.params.id},
     {
 $set : req.body
     });
@@ -92,7 +100,7 @@ $set : req.body
 
 
 app.get("/search/:key",verifyToken,async (req,res) => {
-    let result = await Product.find({
+    let result = await ProductModel.find({
         "$or" : [
             {name : {$regex:req.params.key}},
             {company : {$regex:req.params.key}},
@@ -126,4 +134,14 @@ function verifyToken(req,res,next){
 
 
 
-app.listen(process.env.port || 5000);
+app.listen(process.env.PORT || 5000, async () =>{
+try{
+    await connection;
+    console.log("connection")
+}
+catch(e){
+    console.log(e)
+}
+console.log("server running")
+
+});

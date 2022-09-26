@@ -5,5 +5,6 @@ const userSchema = new mongoose.Schema({
     email : String,
     pass : String
 });
+let UserSchema = mongoose.model("users",userSchema);
 
-module.exports = mongoose.model("users",userSchema);
+module.exports = UserSchema
