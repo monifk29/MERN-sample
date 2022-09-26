@@ -67,11 +67,7 @@ app.get("/products", verifyToken , async(req,res) => {
     }
 })
 
-app.delete("/product/:id",verifyToken,async (req,res) => {
-   
-    let result = await Product.deleteOne({_id:req.params.id});
-    res.send(result)
-})
+  
 
 app.get("/product/:id",verifyToken,async (req,res) => {
    
@@ -130,4 +126,4 @@ function verifyToken(req,res,next){
 
 
 
-app.listen(5000);
+app.listen(process.env.port || 5000);
