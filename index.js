@@ -89,6 +89,16 @@ else{
 }
 })
 
+app.delete("/product/:id",verifyToken,async (req,res) => {
+   
+    let result = await ProductModel.deleteOne({_id:req.params.id});
+
+    res.send(result)
+
+
+
+})
+
 app.put("/product/:id",verifyToken, async (req,res) => {
     let result = await ProductModel.updateOne({_id:req.params.id},
     {
